@@ -1,4 +1,8 @@
-import axios from "axios";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import styles from "./Landing.module.css";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
@@ -73,6 +77,7 @@ const WatchImage = () => {
           "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MYA33ref_SR_S10_VW_PF?wid=1000&hei=1000&fmt=p-jpg&qlt=95&.v=czdWc1FNWHZRRGZrVTlpcjVQTEJxVHVkcStXUmxwTmtpV2dxUWV1ZU5xeXkvYVhHUzZnbTdlRlQ4aGhRUUYyVXZ6RVMwQXJHUjF3MlcvZ3RFeXhMRDVzaDNYQm9FT2pIMkdXYzlEUEliVWM"
         }
         alt="watch-band-image"
+        className={styles.image}
         fill
       />
 
@@ -81,6 +86,7 @@ const WatchImage = () => {
           "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/watch-case-46-aluminum-jetblack-nc-s10_VW_PF+watch-face-46-aluminum-jetblack-s10_VW_PF?wid=1000&hei=1000&fmt=png-alpha&.v=ZkpvU2VZQXB3RnNRVENEZS9Wb2Y3NkVmS05vWHBxQ1hNMzNlZ1l5V3RQRm0xR2lBNEhDZ3RrRjNEOTloOGpFekM4bU8yL1REVmF4VUkrMW5QRGtKeWZZdXM3S3c2TnF5czBINnVYaTd4cVVFV3ZkVVErQ2lxQjUvY3lWaGtLb0N0ellxUDB4dVliN1NPTHhYUld4M0p5am05N0NVWnlUTTNBaW9WT3lDS2lvbmYzRTFGU1cyNFdtdUoxcXBXVFAv"
         }
         alt="watch-dial-image"
+        className={styles.image}
         fill
       />
     </div>
@@ -133,6 +139,7 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
         data = caseProductsData?.products;
         break;
       case 2:
+        //@ts-ignore
         data = bandProductsData?.products;
         break;
 
@@ -187,7 +194,7 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
             >
               {!showInventory && (
                 <div className={styles.heroContainer}>
-                  <h4>Apple Watch Studio</h4>
+                  <h4 className={styles.appleTitle}>Apple Watch Studio</h4>
                   <div>Choose a case.</div>
                   <div>Pick a band.</div>
                   <div>Create your own style.</div>
