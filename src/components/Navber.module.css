@@ -1,0 +1,6 @@
+.container {
+    padding: 36px;
+    @media (max-width: 600) {
+        padding: 16px;
+    }
+}

@@ -1,0 +1,120 @@
+.container{
+    min-height: 90vh;
+    position: relative;
+
+}
+
+.heroContainerWrapper{
+    width: 100%;
+    top: 8vh;
+    position: absolute;
+    z-index: 1;
+
+    @media (max-width: 600) {
+        top: 140px;
+    }
+
+}
+.heroContainer{
+    max-width: 44rem;
+    margin: 0 auto;
+    font-family: SF Pro Display, SF Pro Icons, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 64px;
+    font-weight: 600;
+    letter-spacing: -.009em;
+    line-height: 1.1;
+    color: #1d1d1f;
+
+    >h4{
+    font-size: 21px;
+    font-weight: 400;
+    letter-spacing: .011em;
+    line-height: 1.3;
+    padding-bottom: 10px;
+    }
+
+    @media (max-width: 600) {
+        max-width: 100%;
+        padding: 0 24px;
+        font-size: 40px;
+    }
+}
+
+.getStartedBtn{
+    margin: 43px 0 0;
+padding: 12px 22px;
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: -.022em;
+    line-height: 1.1;
+    background: #0071e3;
+    border: none;
+    outline: none;
+    border-radius: 980px;
+    transition: all 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+.getStartedBtn:hover{
+    background: #0076df;
+}
+
+.watchImageContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transform-origin: center center;
+
+}
+
+.watchImageWrapper {
+    position: absolute;
+    width: min(800px, 100%);
+    aspect-ratio: 1/1;
+    margin: auto;
+    top: 45vh;
+    > img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* @media (max-width: 600px) {
+        top: 60vh;
+    } */
+}
+
+.watchDetailsWrapper{
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 60vh;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.ctaFooter{
+    width: 100%;
+    position: absolute;
+    padding: 24px 24px 40px 24px;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.optionsBtn{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: #e8e8ed;
+    border-radius: 100px;
+    cursor: pointer;
+}
