@@ -6,11 +6,26 @@
 import styles from "./Landing.module.css";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useScreenSize } from "@/hooks/useScreenSize";
 import ProductCarousel from "../ProductCarousel";
-import { bandProductsData, caseProductsData, sizesProductsData } from "../data";
+import axios from "axios";
 
+interface Product {
+  kitAltImage?: {
+    srcSet?: {
+      src: string;
+    };
+  };
+  productName?: string;
+  currentPrice?: string;
+  part?: string;
+  options?: {
+    watch_cases?: string[];
+    watch_bands?: string[];
+  };
+  collectionName?: string;
+}
 
 const optionsButtonArray = [
   {
@@ -69,26 +84,50 @@ const optionsButtonArray = [
   },
 ];
 
-const WatchImage = () => {
+const WatchImage = ({showSideView, sideViewImage} : {showSideView : boolean, sideViewImage: string | undefined}) => {
   return (
     <div className={styles.watchImageWrapper}>
-      <Image
-        src={
-          "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MYA33ref_SR_S10_VW_PF?wid=1000&hei=1000&fmt=p-jpg&qlt=95&.v=czdWc1FNWHZRRGZrVTlpcjVQTEJxVHVkcStXUmxwTmtpV2dxUWV1ZU5xeXkvYVhHUzZnbTdlRlQ4aGhRUUYyVXZ6RVMwQXJHUjF3MlcvZ3RFeXhMRDVzaDNYQm9FT2pIMkdXYzlEUEliVWM"
-        }
-        alt="watch-band-image"
-        className={styles.image}
-        fill
-      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={showSideView ? 'side' : 'front'}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {showSideView ? (
+            <Image
+              src={sideViewImage || ''}
+              alt="watch-band-image"
+              className={styles.image}
+              fill
+            />
+          ) : (
+            <Fragment>
+              <Image
+                src="https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MYA33ref_SR_S10_VW_PF?wid=1000&hei=1000&fmt=p-jpg&qlt=95&.v=czdWc1FNWHZRRGZrVTlpcjVQTEJxVHVkcStXUmxwTmtpV2dxUWV1ZU5xeXkvYVhHUzZnbTdlRlQ4aGhRUUYyVXZ6RVMwQXJHUjF3MlcvZ3RFeXhMRDVzaDNYQm9FT2pIMkdXYzlEUEliVWM"
+                alt="watch-band-image"
+                className={styles.image}
+                fill
+              />
+              <Image
+                src="https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/watch-case-46-aluminum-jetblack-nc-s10_VW_PF+watch-face-46-aluminum-jetblack-s10_VW_PF?wid=1000&hei=1000&fmt=png-alpha&.v=ZkpvU2VZQXB3RnNRVENEZS9Wb2Y3NkVmS05vWHBxQ1hNMzNlZ1l5V3RQRm0xR2lBNEhDZ3RrRjNEOTloOGpFekM4bU8yL1REVmF4VUkrMW5QRGtKeWZZdXM3S3c2TnF5czBINnVYaTd4cVVFV3ZkVVErQ2lxQjUvY3lWaGtLb0N0ellxUDB4dVliN1NPTHhYUld4M0p5am05N0NVWnlUTTNBaW9WT3lDS2lvbmYzRTFGU1cyNFdtdUoxcXBXVFAv"
+                alt="watch-dial-image"
+                className={styles.image}
+                fill
+              />
+            </Fragment>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
 
-      <Image
-        src={
-          "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/watch-case-46-aluminum-jetblack-nc-s10_VW_PF+watch-face-46-aluminum-jetblack-s10_VW_PF?wid=1000&hei=1000&fmt=png-alpha&.v=ZkpvU2VZQXB3RnNRVENEZS9Wb2Y3NkVmS05vWHBxQ1hNMzNlZ1l5V3RQRm0xR2lBNEhDZ3RrRjNEOTloOGpFekM4bU8yL1REVmF4VUkrMW5QRGtKeWZZdXM3S3c2TnF5czBINnVYaTd4cVVFV3ZkVVErQ2lxQjUvY3lWaGtLb0N0ellxUDB4dVliN1NPTHhYUld4M0p5am05N0NVWnlUTTNBaW9WT3lDS2lvbmYzRTFGU1cyNFdtdUoxcXBXVFAv"
-        }
-        alt="watch-dial-image"
-        className={styles.image}
-        fill
-      />
+const Loader = () => {
+  return (
+    <div className={styles.loaderContainer}>
+      <div className={styles.loader}></div>
     </div>
   );
 };
@@ -97,13 +136,13 @@ const Landing = () => {
   const { isMobile } = useScreenSize();
   const [showInventory, setShowInventory] = useState(false);
   const [step, setStep] = useState<number | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState(
-    sizesProductsData.products[0]
-  );
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(false)
+  const [showSideView, setShowSideView] = useState(false)
 
-const [selectedBand, setSelectedBand] = useState(bandProductsData.products[0]);
+  const sideViewImage = selectedProduct?.kitAltImage?.srcSet?.src
 
-const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
   const handleGetStarted = () => {
     setShowInventory(true);
   };
@@ -112,68 +151,53 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
     setStep(optionNumber);
   };
 
-  const handleProductSelect = (product: any) => {
-    switch (step) {
-        case 0:
-            setSelectedProduct(product);
-          break;
-        case 1:
-            setSelectedCase(product)
-          break;
-        case 2:
-            setSelectedBand(product)
-          break;
-  
-        default:
-            setSelectedProduct(product);
-      }
+  const handleProductSelect = (product: Product) => {
+    setSelectedProduct(product);
   };
 
-  const getProductsData = () => {
-    let data = sizesProductsData?.products;
-    switch (step) {
-      case 0:
-        data = sizesProductsData?.products;
-        break;
-      case 1:
-        data = caseProductsData?.products;
-        break;
-      case 2:
-        //@ts-ignore
-        data = bandProductsData?.products;
-        break;
-
-      default:
-        data = sizesProductsData?.products;
-    }
-    return data;
-  };
   const getSelectedProductDetails = () => {
-
-    switch (step) {
-      case 1: // Case selection step
-        return {
-          name: selectedCase.productName,
-          price: parseFloat(selectedCase.currentPrice?.split('$')[1]), // Remove HTML tags from price string
-        };
-        
-      case 2: // Band selection step
-        return {
-          name: selectedBand.productName,
-          price: parseFloat(selectedBand.currentPrice?.split('$')[1]),
-        };
-        
-      default:
-        return {
-            name: "",
-            price: "",
-          };
-    }
+    return {
+      name: selectedProduct?.productName,
+      price: parseFloat(selectedProduct?.currentPrice?.split("$")[1] || ''),
+    };
   };
 
-  console.log(">>>>>>>", selectedCase)
+  const { name, price } = getSelectedProductDetails();
+  useEffect(() => {
+    getProducts();
+  }, [step]);
 
-  const {name, price}  = getSelectedProductDetails()
+  const getProducts = () => {
+    setLoading(true)
+    const params = {
+      product: selectedProduct?.part,
+      watchCases: selectedProduct?.options?.watch_cases,
+      watchBands: selectedProduct?.options?.watch_bands,
+      section: step === 1 ? "case" : step === 2 ? "bands" : "size",
+    };
+    axios
+      .get("/api/studio-api", {
+        params : selectedProduct ? params : {collection : 'apple-watch'},
+      })
+      .then((res) => {
+        const products = res?.data?.body?.products;
+        const defaultProduct = res?.data?.body?.defaultProduct
+        console.log("products", products);
+        if (products) {
+          setProducts(products);
+        }
+        if(!selectedProduct){
+            setSelectedProduct(defaultProduct)
+        }
+      }).finally(() => {
+        setLoading(false)
+      })
+  };
+
+  const toggleView = () => setShowSideView(prev => !prev)
+  console.log("slected", selectedProduct);
+
+  console.log("abcs", products);
 
   return (
     <AnimatePresence mode="wait">
@@ -213,14 +237,16 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
 
         {(step === 0 || step === 1 || step === 2) && showInventory ? (
           <AnimatePresence mode="wait">
-            {(step === 0 || step === 1 || step === 2) && showInventory && (
-              <ProductCarousel
-                products={getProductsData()}
-                onSelect={handleProductSelect}
-                step={step}
-                selectedBand={selectedBand}
-                selectedCase={selectedCase}
-              />
+            {loading ? (
+              <Loader />
+            ) : (
+                <ProductCarousel
+                  products={products}
+                  onSelect={handleProductSelect}
+                  step={step}
+                  selectedProduct={selectedProduct}
+                  showSideView={showSideView}
+                />
             )}
           </AnimatePresence>
         ) : (
@@ -236,7 +262,7 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
               delay: 0.6,
             }}
           >
-            <WatchImage />
+            <WatchImage sideViewImage={sideViewImage} showSideView={showSideView}/>
           </motion.div>
         )}
 
@@ -249,11 +275,11 @@ const [selectedCase, setSelectedCase] = useState(caseProductsData?.products[0]);
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.5, delay: 0.7 }}
           >
-            <div>Side View</div>
-            <div>Apple Watch Series 10</div>
-            <div>{`${name}` }</div>
+            <div onClick={toggleView}>{showSideView ? 'Front View' : 'Side View'}</div>
+            <div>{selectedProduct?.collectionName}</div>
+            <div>{`${name}`}</div>
 
-            <div>From {price}</div>
+            <div>From ${price}</div>
           </motion.div>
         </AnimatePresence>
 
