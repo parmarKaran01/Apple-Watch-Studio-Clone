@@ -58,6 +58,10 @@ interface StudioContextType {
     name: string | undefined;
     price: string | undefined;
   };
+  handleSaveProduct: () => void;
+  savedProducts: Product;
+  showShareOptions: boolean;
+  setShowShareOptions: (show: boolean) => void;
 }
 
 interface ApiParams {
@@ -85,6 +89,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const [apiParams, setApiParams] = useState<ApiParams>({
     collection: collections[0].value,
   });
+  const [savedProducts, setSavedProducts] = useState<Product>({});
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const handleGetStarted = () => {
     setShowInventory(true);
@@ -148,6 +154,21 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
     getProducts();
   }, [apiParams]);
 
+  const handleSaveProduct = useCallback(() => {
+    if (!selectedProduct) return;
+    
+    localStorage.setItem('savedProducts', JSON.stringify(selectedProduct));
+    
+    setSavedProducts(selectedProduct);
+    setShowShareOptions(true);
+  }, [selectedProduct]);
+
+  // Load saved products on mount
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    setSavedProducts(savedItems);
+  }, []);
+
   const value = {
     showInventory,
     setShowInventory,
@@ -164,6 +185,10 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
     toggleView,
     setSelectedCollection,
     getSelectedProductDetails,
+    handleSaveProduct,
+    savedProducts,
+    showShareOptions,
+    setShowShareOptions,
   };
 
   return (

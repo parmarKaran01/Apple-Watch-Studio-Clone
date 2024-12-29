@@ -15,7 +15,7 @@ const ProductCarousel = () => {
     selectedProduct, 
     handleProductSelect, 
     step, 
-    showSideView 
+    showSideView,
   } = useStudio();
   
   const scrollRef = useRef<HTMLDivElement>(null);

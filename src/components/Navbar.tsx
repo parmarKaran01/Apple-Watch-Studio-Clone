@@ -3,14 +3,32 @@ import Image from "next/image";
 import styles from "./Navber.module.css";
 import CollectionsModal from "./CollectionsModal";
 import { useStudio } from "@/context/StudioContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { setSelectedCollection, showInventory } = useStudio();
+  const { setSelectedCollection, showInventory, selectedProduct, handleSaveProduct, showShareOptions, setShowShareOptions } = useStudio();
 
   const handleCollectionSelect = (collection: string) => {
     setSelectedCollection(collection);
+  };
+
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'copy') => {
+    const shareUrl = selectedProduct?.kitImage?.srcSet?.src || '';
+    
+    switch (platform) {
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=Check out my custom watch design!`);
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
+        break;
+      case 'copy':
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+        break;
+    }
+    setShowShareOptions(false);
   };
 
   return (
@@ -39,11 +57,48 @@ const Navbar = () => {
             Collections
           </button>
 
-          <button
-            className={styles.saveButton}
-          >
-            Save
-          </button>
+        <div className={styles.saveButtonWrapper}>
+            <button 
+              className={styles.saveButton} 
+              onClick={() => {
+                handleSaveProduct();
+                setShowShareOptions(true);
+              }}
+            >
+              Save
+            </button>
+            <AnimatePresence>
+              {showShareOptions && (
+                <motion.div 
+                  className={styles.shareDropdown}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <div className={styles.shareHeader}>
+                    <h3>Share your design</h3>
+                    <button 
+                      onClick={() => setShowShareOptions(false)}
+                      className={styles.closeButton}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className={styles.shareButtons}>
+                    <button onClick={() => handleShare('twitter')} className={styles.btn}>
+                      Share on Twitter
+                    </button>
+                    <button onClick={() => handleShare('facebook')} className={styles.btn}>
+                      Share on Facebook
+                    </button>
+                    <button onClick={() => handleShare('copy')} className={styles.btn}>
+                      Copy Link
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            </div>
         </motion.div>
       )}
       <CollectionsModal
