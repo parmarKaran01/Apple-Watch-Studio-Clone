@@ -5,7 +5,7 @@
   padding: 16px 24px;
   background-color: white;
 
-  @media (max-width: 600) {
+  @media (max-width: 600px) {
     flex-direction: column;
     gap: 24px;
   }
@@ -19,7 +19,7 @@
 .rightSection {
   display: flex;
   align-items: center;
-  @media (max-width: 600) {
+  @media (max-width: 600px) {
     width: 100%;
     justify-content: space-between;
   }
