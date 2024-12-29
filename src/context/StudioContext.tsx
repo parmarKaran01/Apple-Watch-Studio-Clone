@@ -62,6 +62,7 @@ interface StudioContextType {
   savedProducts: Product;
   showShareOptions: boolean;
   setShowShareOptions: (show: boolean) => void;
+  setShowSideView: (show: boolean) => void;
 }
 
 interface ApiParams {
@@ -117,6 +118,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
     setApiParams({ collection: selectedCollection });
     setStep(null);
     setSelectedProduct(null);
+    setShowSideView(false)
   }, [selectedCollection]);
 
   useEffect(() => {
@@ -189,6 +191,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
     savedProducts,
     showShareOptions,
     setShowShareOptions,
+    setShowSideView
   };
 
   return (

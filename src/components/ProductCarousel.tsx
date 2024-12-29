@@ -16,6 +16,7 @@ const ProductCarousel = () => {
     handleProductSelect, 
     step, 
     showSideView,
+    setShowSideView
   } = useStudio();
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,8 @@ const ProductCarousel = () => {
         centerProduct 
       ) {
         handleProductSelect(centerProduct);
+        // Reset showSideView to false on scroll
+        setShowSideView(false);
       }
     }
   };
