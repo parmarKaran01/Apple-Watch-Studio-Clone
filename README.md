@@ -70,7 +70,9 @@ Follow these steps to set up and launch the project:
   - Smooth transitions between features.
   - Interactive hover effects.
   - Loading spinners for processes.
-
+ 
+### Performance Scores
+https://pagespeed.web.dev/analysis/https-apple-watch-studio-clone-one-vercel-app/85zl96t523?form_factor=mobile
 ---
 
 ## Technologies Used
