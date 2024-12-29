@@ -123,17 +123,10 @@ const Landing = () => {
         </motion.div>
 
         {(step === 0 || step === 1 || step === 2) && showInventory ? (
-          <AnimatePresence mode="wait">
-            <ProductCarousel
-              products={products}
-              onSelect={handleProductSelect}
-              step={step}
-              selectedProduct={selectedProduct}
-              showSideView={showSideView}
-            />
-          </AnimatePresence>
+          <ProductCarousel />
         ) : (
           <motion.div
+          key={+showInventory}
             className={styles.watchImageContainer}
             animate={{
               scale: !showInventory ? 1 : isMobile ? 0.9 : 0.5,

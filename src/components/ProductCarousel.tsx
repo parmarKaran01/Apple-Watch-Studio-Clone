@@ -8,39 +8,18 @@ import { useEffect, useRef, useCallback } from "react";
 import Loader from "./Loader";
 import { useStudio } from "@/context/StudioContext";
 
-// interface Product {
-//   currentPrice: string;
-//   productName: string;
-//   watchbandImage: {
-//     srcSet: {
-//       src: string;
-//     };
-//   };
-//   watchcaseImage: {
-//     srcSet: {
-//       src: string;
-//     };
-//   };
-//   selected: boolean;
-// }
-
-interface ProductCarouselProps {
-  products: any[];
-  onSelect: (product: any) => void;
-  step: number | null;
-  selectedProduct: any;
-  showSideView: boolean;
-}
-
-const ProductCarousel = ({
-  products,
-  onSelect,
-  step,
-  selectedProduct,
-  showSideView,
-}: ProductCarouselProps) => {
-  const { loading } = useStudio();
+const ProductCarousel = () => {
+  const { 
+    loading, 
+    products, 
+    selectedProduct, 
+    handleProductSelect, 
+    step, 
+    showSideView 
+  } = useStudio();
+  
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isAutoScrolling = useRef(false);
 
   // Find the index of the selected product based on step
   const getSelectedIndex = () => {
@@ -49,13 +28,16 @@ const ProductCarousel = ({
     );
   };
 
+  console.log(">>>", getSelectedIndex())
+
   // Scroll to selected product
   const scrollToSelected = useCallback(() => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || !selectedProduct) return;
 
     const container = scrollRef.current;
     const centerLine = container.offsetWidth / 2;
-    const selectedCard = container.children[getSelectedIndex()];
+    const selectedIndex = getSelectedIndex()
+    const selectedCard = container.children[selectedIndex];
 
     if (selectedCard) {
       const cardRect = selectedCard.getBoundingClientRect();
@@ -64,15 +46,20 @@ const ProductCarousel = ({
         cardRect.left - containerRect.left + cardRect.width / 2;
       const scrollAdjustment = cardCenterX - centerLine;
 
+      isAutoScrolling.current = true;
       container.scrollBy({
         left: scrollAdjustment,
         behavior: "smooth",
       });
+      
+      setTimeout(() => {
+        isAutoScrolling.current = false;
+      }, 500);
     }
-  }, [getSelectedIndex]);
+  }, [getSelectedIndex()])
 
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
+  const handleScroll = () =>{
+    if (!scrollRef.current || isAutoScrolling.current) return;
 
     const scrollContainer = scrollRef.current;
     const containerWidth = scrollContainer.offsetWidth;
@@ -91,10 +78,9 @@ const ProductCarousel = ({
       const centerProduct = products[index];
 
       if (
-        centerProduct &&
-        centerProduct?.productName !== selectedProduct?.productName
+        centerProduct 
       ) {
-        onSelect(centerProduct);
+        handleProductSelect(centerProduct);
       }
     }
   };
@@ -109,8 +95,8 @@ const ProductCarousel = ({
 
   // Scroll to selected product when component mounts or step changes
   useEffect(() => {
-    setTimeout(scrollToSelected, 100);
-  }, [step]);
+    setTimeout(scrollToSelected, 500);
+  }, [step, selectedProduct, products]);
 
   return (
     <motion.div
@@ -137,19 +123,15 @@ const ProductCarousel = ({
                   <AnimatePresence mode="wait">
                     {showSideView && index === getSelectedIndex() ? (
                       <motion.div
-                        key={
-                          showSideView && index === getSelectedIndex()
-                            ? "side"
-                            : "front"
-                        }
+                        key="side"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
                         <Image
-                          src={selectedProduct?.kitAltImage?.srcSet?.src}
-                          alt={selectedProduct?.productName}
+                          src={selectedProduct?.kitAltImage?.srcSet?.src || ''}
+                          alt={selectedProduct?.productName || ''}
                           fill
                         />
                       </motion.div>
@@ -160,16 +142,12 @@ const ProductCarousel = ({
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          key={
-                            showSideView && index === getSelectedIndex()
-                              ? "side"
-                              : "front"
-                          }
+                          key="watchband"
                         >
                           {step !== 1 && (
                             <Image
-                              src={product?.watchbandImage?.srcSet?.src}
-                              alt={product?.productName}
+                              src={product?.watchbandImage?.srcSet?.src || ''}
+                              alt={product?.productName || ''}
                               fill
                             />
                           )}
@@ -180,16 +158,12 @@ const ProductCarousel = ({
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          key={
-                            showSideView && index === getSelectedIndex()
-                              ? "side"
-                              : "front"
-                          }
+                          key="watchcase"
                         >
                           {step !== 2 && (
                             <Image
-                              src={product?.watchcaseImage?.srcSet?.src}
-                              alt={product?.productName}
+                              src={product?.watchcaseImage?.srcSet?.src || ''}
+                              alt={product?.productName || ''}
                               fill
                             />
                           )}
@@ -212,8 +186,8 @@ const ProductCarousel = ({
             >
               {step === 1 && !showSideView && (
                 <Image
-                  src={selectedProduct?.watchbandImage?.srcSet?.src}
-                  alt={selectedProduct?.productName}
+                  src={selectedProduct?.watchbandImage?.srcSet?.src || ''}
+                  alt={selectedProduct?.productName || ''}
                   fill
                   className={styles.outsideImage}
                 />
@@ -229,8 +203,8 @@ const ProductCarousel = ({
             >
               {step === 2 && !showSideView && (
                 <Image
-                  src={selectedProduct?.watchcaseImage?.srcSet?.src}
-                  alt={selectedProduct?.productName}
+                  src={selectedProduct?.watchcaseImage?.srcSet?.src || ''}
+                  alt={selectedProduct?.productName || ''}
                   fill
                   className={styles.outsideCaseImage}
                 />

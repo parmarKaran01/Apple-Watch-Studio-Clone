@@ -146,7 +146,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     getProducts();
-  }, [getProducts]);
+  }, [apiParams]);
 
   const value = {
     showInventory,
