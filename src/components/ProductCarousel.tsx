@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import styles from "./ProductCarousel.module.css";
 import { useEffect, useRef, useCallback } from "react";
+import Loader from "./Loader";
+import { useStudio } from "@/context/StudioContext";
 
 // interface Product {
 //   currentPrice: string;
@@ -37,6 +39,7 @@ const ProductCarousel = ({
   selectedProduct,
   showSideView,
 }: ProductCarouselProps) => {
+  const { loading } = useStudio();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Find the index of the selected product based on step
@@ -118,116 +121,124 @@ const ProductCarousel = ({
       transition={{ duration: 0.5 }}
       key={step}
     >
-      <div ref={scrollRef} className={styles.productsWrapper}>
-        {products.map((product, index) => (
-          <motion.div
-            key={product.productName}
-            className={`${styles.productCard}`}
-          >
-            <div className={styles.imageWrapper}>
-              <AnimatePresence mode="wait">
-                {showSideView && index === getSelectedIndex() ? (
-                  <motion.div
-                    key={
-                      showSideView && index === getSelectedIndex()
-                        ? "side"
-                        : "front"
-                    }
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Image
-                      src={selectedProduct?.kitAltImage?.srcSet?.src}
-                      alt={selectedProduct?.productName}
-                      fill
-                    />
-                  </motion.div>
-                ) : (
-                  <>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      key={
-                        showSideView && index === getSelectedIndex()
-                          ? "side"
-                          : "front"
-                      }
-                    >
-                      {step !== 1 && (
+      {loading ? (
+        <div className={styles.loaderWrapper}>
+          <Loader />
+        </div>
+      ) : (
+        <>
+          <div ref={scrollRef} className={styles.productsWrapper}>
+            {products.map((product, index) => (
+              <motion.div
+                key={product.productName}
+                className={`${styles.productCard}`}
+              >
+                <div className={styles.imageWrapper}>
+                  <AnimatePresence mode="wait">
+                    {showSideView && index === getSelectedIndex() ? (
+                      <motion.div
+                        key={
+                          showSideView && index === getSelectedIndex()
+                            ? "side"
+                            : "front"
+                        }
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
                         <Image
-                          src={product?.watchbandImage?.srcSet?.src}
-                          alt={product?.productName}
+                          src={selectedProduct?.kitAltImage?.srcSet?.src}
+                          alt={selectedProduct?.productName}
                           fill
                         />
-                      )}
-                    </motion.div>
+                      </motion.div>
+                    ) : (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          key={
+                            showSideView && index === getSelectedIndex()
+                              ? "side"
+                              : "front"
+                          }
+                        >
+                          {step !== 1 && (
+                            <Image
+                              src={product?.watchbandImage?.srcSet?.src}
+                              alt={product?.productName}
+                              fill
+                            />
+                          )}
+                        </motion.div>
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      key={
-                        showSideView && index === getSelectedIndex()
-                          ? "side"
-                          : "front"
-                      }
-                    >
-                      {step !== 2 && (
-                        <Image
-                          src={product?.watchcaseImage?.srcSet?.src}
-                          alt={product?.productName}
-                          fill
-                        />
-                      )}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          key={
+                            showSideView && index === getSelectedIndex()
+                              ? "side"
+                              : "front"
+                          }
+                        >
+                          {step !== 2 && (
+                            <Image
+                              src={product?.watchcaseImage?.srcSet?.src}
+                              alt={product?.productName}
+                              fill
+                            />
+                          )}
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          key={showSideView ? "side" : "front"}
-        >
-          {step === 1 && !showSideView && (
-            <Image
-              src={selectedProduct?.watchbandImage?.srcSet?.src}
-              alt={selectedProduct?.productName}
-              fill
-              className={styles.outsideImage}
-            />
-          )}
-        </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              key={showSideView ? "side" : "front"}
+            >
+              {step === 1 && !showSideView && (
+                <Image
+                  src={selectedProduct?.watchbandImage?.srcSet?.src}
+                  alt={selectedProduct?.productName}
+                  fill
+                  className={styles.outsideImage}
+                />
+              )}
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          key={showSideView ? "side" : "front"}
-        >
-          {step === 2 && !showSideView && (
-            <Image
-              src={selectedProduct?.watchcaseImage?.srcSet?.src}
-              alt={selectedProduct?.productName}
-              fill
-              className={styles.outsideCaseImage}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              key={showSideView ? "side" : "front"}
+            >
+              {step === 2 && !showSideView && (
+                <Image
+                  src={selectedProduct?.watchcaseImage?.srcSet?.src}
+                  alt={selectedProduct?.productName}
+                  fill
+                  className={styles.outsideCaseImage}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </>
+      )}
     </motion.div>
   );
 };

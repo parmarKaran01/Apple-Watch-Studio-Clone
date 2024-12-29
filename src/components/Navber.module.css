@@ -1,6 +1,60 @@
 .container {
-    padding: 36px;
-    @media (max-width: 600) {
-        padding: 16px;
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: white;
+
+  @media (max-width: 600) {
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  @media (max-width: 600) {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.collectionsButton {
+  background: none;
+  padding: 12px 22px;
+  border-radius: 980px;
+  font-size: 17px;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+}
+
+.collectionsButton:hover {
+  background-color: #f5f5f7;
+}
+
+.saveButton {
+  padding: 12px 22px;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  line-height: 1.1;
+  background: #0071e3;
+  border: none;
+  outline: none;
+  border-radius: 980px;
+  transition: all 0.5s ease-in-out;
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  background: #0076df;
 }

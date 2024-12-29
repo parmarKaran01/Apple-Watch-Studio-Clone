@@ -3,29 +3,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import styles from "./Landing.module.css";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Fragment, useEffect, useState } from "react";
 import { useScreenSize } from "@/hooks/useScreenSize";
 import ProductCarousel from "../ProductCarousel";
-import axios from "axios";
-
-interface Product {
-  kitAltImage?: {
-    srcSet?: {
-      src: string;
-    };
-  };
-  productName?: string;
-  currentPrice?: string;
-  part?: string;
-  options?: {
-    watch_cases?: string[];
-    watch_bands?: string[];
-  };
-  collectionName?: string;
-}
+import { useStudio } from "@/context/StudioContext";
+import WatchImage from "../WatchImage";
+import styles from "./Landing.module.css";
 
 const optionsButtonArray = [
   {
@@ -84,120 +67,24 @@ const optionsButtonArray = [
   },
 ];
 
-const WatchImage = ({showSideView, sideViewImage} : {showSideView : boolean, sideViewImage: string | undefined}) => {
-  return (
-    <div className={styles.watchImageWrapper}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={showSideView ? 'side' : 'front'}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {showSideView ? (
-            <Image
-              src={sideViewImage || ''}
-              alt="watch-band-image"
-              className={styles.image}
-              fill
-            />
-          ) : (
-            <Fragment>
-              <Image
-                src="https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MYA33ref_SR_S10_VW_PF?wid=1000&hei=1000&fmt=p-jpg&qlt=95&.v=czdWc1FNWHZRRGZrVTlpcjVQTEJxVHVkcStXUmxwTmtpV2dxUWV1ZU5xeXkvYVhHUzZnbTdlRlQ4aGhRUUYyVXZ6RVMwQXJHUjF3MlcvZ3RFeXhMRDVzaDNYQm9FT2pIMkdXYzlEUEliVWM"
-                alt="watch-band-image"
-                className={styles.image}
-                fill
-              />
-              <Image
-                src="https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/watch-case-46-aluminum-jetblack-nc-s10_VW_PF+watch-face-46-aluminum-jetblack-s10_VW_PF?wid=1000&hei=1000&fmt=png-alpha&.v=ZkpvU2VZQXB3RnNRVENEZS9Wb2Y3NkVmS05vWHBxQ1hNMzNlZ1l5V3RQRm0xR2lBNEhDZ3RrRjNEOTloOGpFekM4bU8yL1REVmF4VUkrMW5QRGtKeWZZdXM3S3c2TnF5czBINnVYaTd4cVVFV3ZkVVErQ2lxQjUvY3lWaGtLb0N0ellxUDB4dVliN1NPTHhYUld4M0p5am05N0NVWnlUTTNBaW9WT3lDS2lvbmYzRTFGU1cyNFdtdUoxcXBXVFAv"
-                alt="watch-dial-image"
-                className={styles.image}
-                fill
-              />
-            </Fragment>
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const Loader = () => {
-  return (
-    <div className={styles.loaderContainer}>
-      <div className={styles.loader}></div>
-    </div>
-  );
-};
-
 const Landing = () => {
   const { isMobile } = useScreenSize();
-  const [showInventory, setShowInventory] = useState(false);
-  const [step, setStep] = useState<number | null>(null);
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(false)
-  const [showSideView, setShowSideView] = useState(false)
+  const {
+    showInventory,
+    step,
+    products,
+    selectedProduct,
+    showSideView,
+    handleGetStarted,
+    handleOptionClick,
+    handleProductSelect,
+    toggleView,
+    getSelectedProductDetails,
+  } = useStudio();
 
-  const sideViewImage = selectedProduct?.kitAltImage?.srcSet?.src
-
-  const handleGetStarted = () => {
-    setShowInventory(true);
-  };
-
-  const handleOptionClick = (optionNumber: number) => {
-    setStep(optionNumber);
-  };
-
-  const handleProductSelect = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const getSelectedProductDetails = () => {
-    return {
-      name: selectedProduct?.productName,
-      price: parseFloat(selectedProduct?.currentPrice?.split("$")[1] || ''),
-    };
-  };
-
-  const { name, price } = getSelectedProductDetails();
-  useEffect(() => {
-    getProducts();
-  }, [step]);
-
-  const getProducts = () => {
-    setLoading(true)
-    const params = {
-      product: selectedProduct?.part,
-      watchCases: selectedProduct?.options?.watch_cases,
-      watchBands: selectedProduct?.options?.watch_bands,
-      section: step === 1 ? "case" : step === 2 ? "bands" : "size",
-    };
-    axios
-      .get("/api/studio-api", {
-        params : selectedProduct ? params : {collection : 'apple-watch'},
-      })
-      .then((res) => {
-        const products = res?.data?.body?.products;
-        const defaultProduct = res?.data?.body?.defaultProduct
-        console.log("products", products);
-        if (products) {
-          setProducts(products);
-        }
-        if(!selectedProduct){
-            setSelectedProduct(defaultProduct)
-        }
-      }).finally(() => {
-        setLoading(false)
-      })
-  };
-
-  const toggleView = () => setShowSideView(prev => !prev)
-  console.log("slected", selectedProduct);
-
-  console.log("abcs", products);
+  const { name, price } = selectedProduct
+    ? getSelectedProductDetails()
+    : { name: "", price: 0 };
 
   return (
     <AnimatePresence mode="wait">
@@ -237,24 +124,20 @@ const Landing = () => {
 
         {(step === 0 || step === 1 || step === 2) && showInventory ? (
           <AnimatePresence mode="wait">
-            {loading ? (
-              <Loader />
-            ) : (
-                <ProductCarousel
-                  products={products}
-                  onSelect={handleProductSelect}
-                  step={step}
-                  selectedProduct={selectedProduct}
-                  showSideView={showSideView}
-                />
-            )}
+            <ProductCarousel
+              products={products}
+              onSelect={handleProductSelect}
+              step={step}
+              selectedProduct={selectedProduct}
+              showSideView={showSideView}
+            />
           </AnimatePresence>
         ) : (
           <motion.div
             className={styles.watchImageContainer}
             animate={{
               scale: !showInventory ? 1 : isMobile ? 0.9 : 0.5,
-              y: !showInventory ? 0 : isMobile ? "-25vh" : "-20vh",
+              y: !showInventory ? 0 : isMobile ? "-35vh" : "-20vh",
             }}
             transition={{
               duration: 1,
@@ -262,25 +145,31 @@ const Landing = () => {
               delay: 0.6,
             }}
           >
-            <WatchImage sideViewImage={sideViewImage} showSideView={showSideView}/>
+            <WatchImage showSideView={showSideView} />
           </motion.div>
         )}
 
         <AnimatePresence mode="wait">
-          <motion.div
-            className={styles.watchDetailsWrapper}
-            key={+showInventory}
-            initial={{ y: 0, opacity: 0 }}
-            animate={{ y: 0, opacity: showInventory ? 1 : 0 }}
-            exit={{ y: -10, opacity: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-          >
-            <div onClick={toggleView}>{showSideView ? 'Front View' : 'Side View'}</div>
-            <div>{selectedProduct?.collectionName}</div>
-            <div>{`${name}`}</div>
+          {selectedProduct && (
+            <motion.div
+              className={styles.watchDetailsWrapper}
+              key={+showInventory}
+              initial={{ y: 0, opacity: 0 }}
+              animate={{ y: 0, opacity: showInventory ? 1 : 0 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+            >
+              <div onClick={toggleView} className={styles.viewText}>
+                {showSideView ? "Front View" : "Side View"}
+              </div>
+              <div className={styles.collectionText}>
+                {selectedProduct?.collectionName}
+              </div>
+              <div className={styles.productName}>{`${name}`}</div>
 
-            <div>From ${price}</div>
-          </motion.div>
+              <div className={styles.price}>{price}</div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
